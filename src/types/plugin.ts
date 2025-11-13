@@ -11,6 +11,9 @@ export interface ClaudeCodeInput {
     display_name?: string;
   };
   version?: string;
+  output_style?: {
+    name?: string;
+  };
   cost?: {
     total_cost_usd?: number;
     total_duration_ms?: number;
@@ -19,15 +22,6 @@ export interface ClaudeCodeInput {
     total_lines_removed?: number;
   };
   exceeds_200k_tokens?: boolean;
-  usage?: {
-    input_tokens?: number;
-    output_tokens?: number;
-    total_tokens?: number;
-  };
-  context?: {
-    used_tokens?: number;
-    max_tokens?: number;
-  };
 }
 
 export interface PluginContext {

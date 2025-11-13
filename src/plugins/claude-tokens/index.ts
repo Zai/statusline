@@ -84,20 +84,6 @@ export default {
         }
       }
 
-      // Fallback: try old methods if transcript is not available
-      if (usedTokens === 0 && maxTokens === 0) {
-        if (context.input.context) {
-          usedTokens = context.input.context.used_tokens || 0;
-          maxTokens = context.input.context.max_tokens || 0;
-        } else if (context.input.usage) {
-          usedTokens = context.input.usage.total_tokens || 0;
-          maxTokens = 200000;
-        }
-
-        percentage =
-          maxTokens > 0 ? ((usedTokens / maxTokens) * 100).toFixed(1) : "0";
-      }
-
       // If no data available, display nothing
       if (usedTokens === 0 && maxTokens === 0) {
         return { content: "" };
