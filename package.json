@@ -12,13 +12,22 @@
     "watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "Zai",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cli",
+    "status-line",
+    "terminal"
+  ],
+  "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.10.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
 }

@@ -42,10 +42,6 @@ export interface PluginOptions {
 
 export interface PluginConfig {
   name: string;
-  enabled: boolean;
-  order: number;
-  prefix?: string;
-  suffix?: string;
   icon?: string;
   color?: string;
   options?: PluginOptions;

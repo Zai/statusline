@@ -1,19 +1,21 @@
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { colors } from '../../lib/constant.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Load default config
+const defaultConfig = JSON.parse(readFileSync(join(__dirname, 'config.json'), 'utf-8'));
 export const directoryPlugin = {
     name: 'directory',
-    execute(context, config) {
+    execute(context, userConfig) {
         try {
-            // Common options (from config root)
-            const prefix = config.prefix || '';
-            const suffix = config.suffix || '';
-            const icon = config.icon || '📁';
-            const color = config.color || 'blue';
-            // Specific options (from config.options)
+            // Merge default config with user config
+            const config = { ...defaultConfig, ...userConfig };
             const options = config.options;
-            const showFullPath = options?.showFullPath || false;
-            const displayPath = showFullPath ? context.currentDir : context.dirName;
-            const colorCode = colors[color] || colors.blue;
-            const content = `${prefix}${colors.bright}${colorCode}${icon} ${displayPath}${colors.reset}${suffix}`;
+            const displayPath = options?.showFullPath ? context.currentDir : context.dirName;
+            const colorCode = colors[config.color];
+            const content = `${colors.bright}${colorCode}${config.icon} ${displayPath}${colors.reset}`;
             return { content };
         }
         catch (error) {

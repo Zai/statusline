@@ -61,68 +61,39 @@ Or with absolute path:
 
 ## Plugin Configuration
 
-The statusline uses a configurable plugin system with **two configuration levels**:
+The statusline uses a **modular plugin system** where each plugin is autonomous and self-configures:
 
-1. **Default configuration**: Each plugin has its own `config.json` file in `src/plugins/{name}/config.json`
-2. **User configuration**: Optional `config.json` file at project root for overrides
+1. **Default configuration**: Each plugin loads its own `config.json` with default values
+2. **User configuration**: Optional `config.json` file at project root to enable/customize plugins
+3. **Automatic merging**: Plugins merge their defaults with user overrides
 
-Both configurations are **automatically merged**: you only specify what you want to change!
+**You don't need to create `config.json` to use the statusline** - it works out-of-the-box!
 
-### Default Configuration
+### Quick Start
 
-All plugins have pre-configured default values. **You don't need to create `config.json` to use the statusline** - it works out-of-the-box with default settings.
-
-Default configurations are located in:
-- `src/plugins/directory/config.json`
-- `src/plugins/git/config.json`
-- `src/plugins/node-version/config.json`
-- `src/plugins/claude-tokens/config.json`
-
-### Customization: `config.json` Structure
-
-To customize the statusline, create a `config.json` file at the project root and **specify only what you want to change**:
+Create a `config.json` at the project root:
 
 ```json
 {
+  "separator": " | ",
   "plugins": [
-    {
-      "name": "directory",
-      "icon": "📂"
-    },
-    {
-      "name": "git",
-      "prefix": " → "
-    },
-    {
-      "name": "node-version",
-      "enabled": false
-    }
+    { "name": "directory" },
+    { "name": "git" },
+    { "name": "node-version" },
+    { "name": "claude-tokens" }
   ]
 }
 ```
 
-**Example**: See `config.json.example` for more customization examples.
+**How it works:**
+- **Plugin order** = array position (first in array = first displayed)
+- **Enabled plugins** = plugins present in the array
+- **Disabled plugins** = simply omit them from the array
 
-#### How Does Merging Work?
+### Customizing Plugins
 
-Fields specified in your `config.json` **override** the plugin's default values. Unspecified fields keep their default value.
+Override any plugin setting by adding fields:
 
-**Merge example:**
-
-Default plugin configuration for directory:
-```json
-{
-  "name": "directory",
-  "enabled": true,
-  "order": 1,
-  "prefix": "",
-  "icon": "📁",
-  "color": "blue",
-  "options": { "showFullPath": false }
-}
-```
-
-Your config.json:
 ```json
 {
   "plugins": [
@@ -130,8 +101,51 @@ Your config.json:
       "name": "directory",
       "icon": "📂",
       "options": { "showFullPath": true }
+    },
+    {
+      "name": "git",
+      "color": "cyan",
+      "options": { "dirtyColor": "red" }
     }
   ]
+}
+```
+
+**Global options:**
+- **`separator`** (string): Text displayed between plugins (default: `" "`)
+
+**Per-plugin options:**
+- **`name`** *(required)*: Plugin name
+- **`icon`**: Custom icon
+- **`color`**: Text color (`"blue"`, `"green"`, `"cyan"`, `"yellow"`, `"magenta"`, `"red"`, `"gray"`)
+- **`options`**: Plugin-specific options (see plugin docs)
+
+### How Merging Works
+
+Each plugin is **autonomous** and manages its own configuration:
+
+1. Plugin loads its default `config.json`
+2. User provides overrides in root `config.json`
+3. Plugin merges: `{ ...defaults, ...userConfig }`
+
+**Example:**
+
+Plugin's default (from `src/plugins/directory/config.json`):
+```json
+{
+  "name": "directory",
+  "icon": "📁",
+  "color": "blue",
+  "options": { "showFullPath": false }
+}
+```
+
+Your override (in root `config.json`):
+```json
+{
+  "name": "directory",
+  "icon": "📂",
+  "options": { "showFullPath": true }
 }
 ```
 
@@ -139,186 +153,86 @@ Result after merge:
 ```json
 {
   "name": "directory",
-  "enabled": true,
-  "order": 1,
-  "prefix": "",
-  "icon": "📂",           ← modified
-  "color": "blue",
-  "options": { "showFullPath": true }  ← modified
+  "icon": "📂",           ← overridden
+  "color": "blue",        ← kept from default
+  "options": { "showFullPath": true }  ← overridden
 }
 ```
-
-#### Available Customization Fields
-
-Each plugin can be configured with:
-- **`name`** *(required)*: Plugin name
-- **`enabled`**: `true` to enable, `false` to disable
-- **`order`**: Display order (1 = first, 2 = second, etc.)
-- **`prefix`**: Text to display before plugin content
-- **`suffix`**: Text to display after plugin content
-- **`icon`**: Icon to display
-- **`color`**: Text color ("blue", "green", "cyan", "yellow", "magenta", "red")
-- **`options`**: Plugin-specific options (varies by plugin)
 
 ### Available Plugins
 
-#### 📁 Directory Plugin
+#### 📁 [Directory](src/plugins/directory/README.md)
 
-Displays the current directory name.
+Displays the current directory name or full path.
 
-**Common options:**
-- `prefix` (string): Text before directory (default: "")
-- `suffix` (string): Text after directory (default: "")
-- `icon` (string): Icon to display (default: "📁")
-- `color` (string): Text color (default: "blue")
+- **Default:** `📁 statusline`
+- **Options:** `showFullPath`, custom icon/color
+- **[Full documentation →](src/plugins/directory/README.md)**
 
-**Specific options:**
-- `showFullPath` (boolean): Show full path instead of name (default: false)
+#### 🔀 [Git](src/plugins/git/README.md)
 
-**Example:**
-```json
-{
-  "name": "directory",
-  "enabled": true,
-  "order": 1,
-  "prefix": "",
-  "suffix": "",
-  "icon": "📂",
-  "color": "cyan",
-  "options": {
-    "showFullPath": false
-  }
-}
-```
+Shows Git branch and modification statistics (file count + line changes).
 
-#### 🔀 Git Plugin
+- **Default:** `main !3 +45/-12` (when modified)
+- **Options:** `showFileCount`, `showLineStats`, `dirtyColor`
+- **[Full documentation →](src/plugins/git/README.md)**
 
-Displays the active Git branch and modification status.
+#### ⬢ [Node Version](src/plugins/node-version/README.md)
 
-**Common options:**
-- `prefix` (string): Text before branch (default: " on ")
-- `suffix` (string): Text after branch (default: "")
-- `icon` (string): Icon to display (default: "")
-- `color` (string): Clean branch color (default: "green")
+Displays the current Node.js version.
 
-**Specific options:**
-- `showStatus` (boolean): Show modification status (default: true)
-- `dirtyIcon` (string): Icon for modifications (default: "±")
-- `dirtyColor` (string): Color with modifications (default: "yellow")
+- **Default:** `⬢ 18.0.0`
+- **Options:** `format` (short/full)
+- **[Full documentation →](src/plugins/node-version/README.md)**
 
-**Example:**
-```json
-{
-  "name": "git",
-  "enabled": true,
-  "order": 2,
-  "prefix": " → ",
-  "suffix": "",
-  "icon": "",
-  "color": "green",
-  "options": {
-    "showStatus": true,
-    "dirtyIcon": "✗",
-    "dirtyColor": "red"
-  }
-}
-```
+#### 🔵 [Claude Tokens](src/plugins/claude-tokens/README.md)
 
-#### ⬢ Node Version Plugin
+Shows Claude Code token usage with count and percentage.
 
-Displays the Node.js version.
+- **Default:** `🔵 59.1k/200k (29.6%)`
+- **Options:** `showPercentage`, `showCount`, `format` (compact/full)
+- **[Full documentation →](src/plugins/claude-tokens/README.md)**
 
-**Common options:**
-- `prefix` (string): Text before version (default: "")
-- `suffix` (string): Text after version (default: "")
-- `icon` (string): Icon to display (default: "⬢")
-- `color` (string): Text color (default: "green")
+### Creating Custom Plugins
 
-**Specific options:**
-- `format` (string): "short" (18.0.0) or "full" (v18.0.0) (default: "short")
+Want to create your own plugin? See the **[Plugin Development Guide](src/plugins/README.md)** for detailed instructions on creating autonomous plugins.
 
-**Example:**
-```json
-{
-  "name": "node-version",
-  "enabled": true,
-  "order": 3,
-  "prefix": " ",
-  "suffix": "",
-  "icon": "🟢",
-  "color": "green",
-  "options": {
-    "format": "short"
-  }
-}
-```
+### Enabling/Disabling Plugins
 
-#### 🔵 Claude Tokens Plugin
+**To enable a plugin:** Add it to the `plugins` array in your `config.json`
 
-Displays Claude Code token usage.
+**To disable a plugin:** Simply remove it from the array (or don't include it)
 
-**Common options:**
-- `prefix` (string): Text before tokens (default: "")
-- `suffix` (string): Text after tokens (default: "")
-- `icon` (string): Icon to display (default: "🔵")
-- `color` (string): Text color (default: "cyan")
-
-**Specific options:**
-- `showPercentage` (boolean): Show percentage (default: true)
-- `showCount` (boolean): Show token count (default: true)
-- `format` (string): "compact" (59.1k/200k) or "full" (59,100/200,000) (default: "compact")
-
-**Example:**
-```json
-{
-  "name": "claude-tokens",
-  "enabled": true,
-  "order": 4,
-  "prefix": " ",
-  "suffix": "",
-  "icon": "📊",
-  "color": "magenta",
-  "options": {
-    "showPercentage": true,
-    "showCount": true,
-    "format": "compact"
-  }
-}
-```
-
-### Disabling a Plugin
-
-To disable a plugin, set `enabled` to `false`:
-
-```json
-{
-  "name": "node-version",
-  "enabled": false,
-  "order": 3,
-  "options": {}
-}
-```
-
-### Changing Display Order
-
-Modify the `order` value to change display order:
-
+**Example - only directory and git:**
 ```json
 {
   "plugins": [
-    { "name": "git", "enabled": true, "order": 1 },
-    { "name": "directory", "enabled": true, "order": 2 }
+    { "name": "directory" },
+    { "name": "git" }
   ]
 }
 ```
 
-Result: `main ± 📁 statusline`
+### Changing Plugin Order
+
+The order in the `plugins` array determines display order:
+
+```json
+{
+  "plugins": [
+    { "name": "git" },        // First
+    { "name": "directory" }   // Second
+  ]
+}
+```
+
+**Result:** `main 📁 statusline`
 
 ## Rendering Examples
 
 ### Default configuration (all plugins enabled)
 ```
-📁 statusline on main ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
+📁 statusline main ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
 ```
 
 ### Directory without Git
@@ -328,45 +242,48 @@ Result: `main ± 📁 statusline`
 
 ### Directory with Git (no modifications)
 ```
-📁 my-project on main ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
+📁 my-project main ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
 ```
 
 ### Directory with Git (uncommitted modifications)
 ```
-📁 my-project on main± ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
+📁 my-project main !3 +45/-12 ⬢ 18.0.0 🔵 59.1k/200k (29.6%)
 ```
+(3 modified files, 45 lines added, 12 lines deleted)
 
 ### Minimal configuration (directory + git only)
 ```
-📁 statusline on main±
+📁 statusline main !3 +45/-12
 ```
 
-### Custom configuration
+### Custom configuration with separator
 With this configuration:
 ```json
 {
+  "separator": " | ",
   "plugins": [
-    { "name": "git", "order": 1 },
-    { "name": "directory", "order": 2 },
-    { "name": "claude-tokens", "order": 3, "options": { "showCount": false } }
+    { "name": "directory" },
+    { "name": "git" },
+    { "name": "claude-tokens", "options": { "showCount": false } }
   ]
 }
 ```
 
 Result:
 ```
-main± 📁 statusline 🔵 29.6%
+📁 statusline | main !3 +45/-12 | 🔵 29.6%
 ```
 
 ### Color Preview
 
 In your terminal, the statusline will appear with the following colors:
-- **Directory**: Bright blue bold with 📁 icon
-- **"on"**: Discreet gray
-- **Clean branch**: Green
-- **Branch with modifications**: Yellow with ± symbol
+- **Directory**: Bright blue with 📁 icon
+- **Git branch**: Green (configurable with `color`)
+- **Git modifications**: Yellow `!N +X/-Y` format (configurable with `dirtyColor`)
 - **Node version**: Green with ⬢ icon
 - **Claude tokens**: Cyan with 🔵 icon
+
+All colors are customizable per-plugin in your `config.json`.
 
 ## Project Structure
 
@@ -382,16 +299,21 @@ statusline/
 │   │   ├── merge.ts               # Deep merge utility
 │   │   └── plugin-manager.ts      # Plugin manager
 │   ├── plugins/
+│   │   ├── README.md              # 📖 Plugin Development Guide
 │   │   ├── directory/
+│   │   │   ├── README.md          # 📖 Directory plugin documentation
 │   │   │   ├── config.json        # ⭐ Default configuration
 │   │   │   └── index.ts           # Directory plugin
 │   │   ├── git/
+│   │   │   ├── README.md          # 📖 Git plugin documentation
 │   │   │   ├── config.json        # ⭐ Default configuration
 │   │   │   └── index.ts           # Git plugin
 │   │   ├── node-version/
+│   │   │   ├── README.md          # 📖 Node version plugin documentation
 │   │   │   ├── config.json        # ⭐ Default configuration
 │   │   │   └── index.ts           # Node version plugin
 │   │   └── claude-tokens/
+│   │       ├── README.md          # 📖 Claude tokens plugin documentation
 │   │       ├── config.json        # ⭐ Default configuration
 │   │       ├── index.ts           # Claude tokens plugin
 │   │       └── transcript-parser.ts  # Transcript parsing utility
@@ -494,98 +416,19 @@ export const colors = {
 
 ### Creating a Custom Plugin
 
-You can easily create your own plugins:
+Creating your own plugin is straightforward. Each plugin is autonomous and self-configures.
 
-1. **Create a new directory in `src/plugins/`** (e.g., `src/plugins/time/`)
+**For detailed step-by-step instructions, see the [Plugin Development Guide](src/plugins/README.md).**
 
-2. **Create the file `src/plugins/time/config.json`** with default values:
+**Quick overview:**
 
-```json
-{
-  "name": "time",
-  "enabled": true,
-  "order": 5,
-  "prefix": " ",
-  "suffix": "",
-  "icon": "🕐",
-  "color": "cyan",
-  "options": {
-    "format": "24h"
-  }
-}
-```
+1. Create `src/plugins/my-plugin/config.json` with defaults (no `enabled` or `order`)
+2. Create `src/plugins/my-plugin/index.ts` with your plugin logic
+3. Plugin loads its config and merges with user overrides
+4. Register plugin in `plugin-manager.ts`
+5. Users enable it by adding `{ "name": "my-plugin" }` to their config
 
-3. **Create the file `src/plugins/time/index.ts`**:
-
-```typescript
-import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
-import { colors } from '../../lib/constant.js';
-
-interface TimeOptions {
-  format?: '12h' | '24h';
-}
-
-export const timePlugin: Plugin = {
-  name: 'time',
-
-  execute(context: PluginContext, config: PluginConfig): PluginResult {
-    try {
-      // Common options (from config root)
-      const prefix = config.prefix || '';
-      const suffix = config.suffix || '';
-      const icon = config.icon || '🕐';
-      const color = config.color || 'cyan';
-
-      // Specific options (from config.options)
-      const options = config.options as TimeOptions | undefined;
-      const format = options?.format || '24h';
-
-      const now = new Date();
-      let timeStr = '';
-
-      if (format === '12h') {
-        timeStr = now.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
-      } else {
-        timeStr = now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-      }
-
-      const colorCode = colors[color as keyof typeof colors] || colors.cyan;
-      const content = `${prefix}${colorCode}${icon} ${timeStr}${colors.reset}${suffix}`;
-
-      return { content };
-    } catch (error) {
-      return {
-        content: '',
-        error: error instanceof Error ? error.message : 'Unknown error in time plugin',
-      };
-    }
-  },
-};
-```
-
-4. **Register the plugin in `src/lib/plugin-manager.ts`**
-
-```typescript
-import { timePlugin } from '../plugins/time/index.js';
-
-// In the constructor
-this.registerPlugin(timePlugin);
-```
-
-5. **Compile and test**
-
-```bash
-pnpm build
-echo '{"workspace":{"current_dir":"'$(pwd)'"}}' | node dist/index.js
-```
+See the [guide](src/plugins/README.md) for complete examples and best practices!
 
 ### Available Icons
 

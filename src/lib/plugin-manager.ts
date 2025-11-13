@@ -6,18 +6,17 @@ import { directoryPlugin } from '../plugins/directory/index.js';
 import { gitPlugin } from '../plugins/git/index.js';
 import { nodeVersionPlugin } from '../plugins/node-version/index.js';
 import { claudeTokensPlugin } from '../plugins/claude-tokens/index.js';
-import { deepMerge } from './merge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 interface Config {
+  separator?: string;
   plugins: PluginConfig[];
 }
 
 export class PluginManager {
   private plugins: Map<string, Plugin> = new Map();
-  private pluginDefaults: Map<string, PluginConfig> = new Map();
   private config: Config;
 
   constructor(configPath?: string) {
@@ -26,9 +25,6 @@ export class PluginManager {
     this.registerPlugin(gitPlugin);
     this.registerPlugin(nodeVersionPlugin);
     this.registerPlugin(claudeTokensPlugin);
-
-    // Load default configurations for each plugin
-    this.loadPluginDefaults();
 
     // Load user configuration (optional)
     const defaultConfigPath = join(__dirname, '../../config.json');
@@ -52,45 +48,15 @@ export class PluginManager {
     this.config = this.mergeConfigs(userConfig);
   }
 
-  private loadPluginDefaults(): void {
-    for (const [pluginName] of this.plugins) {
-      const configPath = join(__dirname, `../plugins/${pluginName}/config.json`);
-      try {
-        const configContent = readFileSync(configPath, 'utf-8');
-        const defaultConfig: PluginConfig = JSON.parse(configContent);
-        this.pluginDefaults.set(pluginName, defaultConfig);
-      } catch (error) {
-        console.error(
-          `Warning: Failed to load default config for plugin "${pluginName}": ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`
-        );
-      }
-    }
-  }
-
   private mergeConfigs(userConfig: Config | null): Config {
-    const mergedPlugins: PluginConfig[] = [];
+    // Merge root-level config
+    const defaultRootConfig = { separator: ' ', plugins: [] };
+    const rootConfig = { ...defaultRootConfig, ...userConfig };
 
-    // For each registered plugin
-    for (const [pluginName, defaultConfig] of this.pluginDefaults) {
-      // Find user config for this plugin
-      const userPluginConfig = userConfig?.plugins.find((p) => p.name === pluginName);
-
-      if (userPluginConfig) {
-        // Merge user config with defaults
-        const merged = deepMerge(defaultConfig, userPluginConfig);
-        mergedPlugins.push(merged);
-      } else {
-        // Use defaults
-        mergedPlugins.push(defaultConfig);
-      }
-    }
-
-    // Sort by order
-    mergedPlugins.sort((a, b) => a.order - b.order);
-
-    return { plugins: mergedPlugins };
+    return {
+      separator: rootConfig.separator,
+      plugins: rootConfig.plugins
+    };
   }
 
   private registerPlugin(plugin: Plugin): void {
@@ -98,41 +64,33 @@ export class PluginManager {
   }
 
   public async execute(context: PluginContext): Promise<string> {
-    const results: Array<{ order: number; content: string }> = [];
+    const results: string[] = [];
     const errors: string[] = [];
 
-    // Filter enabled plugins and sort by order
-    const enabledPlugins = this.config.plugins
-      .filter((config) => config.enabled)
-      .sort((a, b) => a.order - b.order);
-
-    // Execute each plugin
-    for (const pluginConfig of enabledPlugins) {
-      const plugin = this.plugins.get(pluginConfig.name);
+    // Execute each plugin in order (order = array position)
+    for (const userPluginConfig of this.config.plugins) {
+      const plugin = this.plugins.get(userPluginConfig.name);
 
       if (!plugin) {
-        errors.push(`Plugin "${pluginConfig.name}" not found`);
+        errors.push(`Plugin "${userPluginConfig.name}" not found`);
         continue;
       }
 
       try {
         const result: PluginResult = await Promise.resolve(
-          plugin.execute(context, pluginConfig)
+          plugin.execute(context, userPluginConfig)
         );
 
         if (result.error) {
-          errors.push(`${pluginConfig.name}: ${result.error}`);
+          errors.push(`${userPluginConfig.name}: ${result.error}`);
         }
 
         if (result.content) {
-          results.push({
-            order: pluginConfig.order,
-            content: result.content,
-          });
+          results.push(result.content);
         }
       } catch (error) {
         errors.push(
-          `${pluginConfig.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `${userPluginConfig.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }
@@ -142,8 +100,8 @@ export class PluginManager {
       console.error('Plugin errors:', errors);
     }
 
-    // Assemble results
-    return results.map((r) => r.content).join('');
+    // Assemble results with separator
+    return results.join(this.config.separator);
   }
 
   public getConfig(): Config {

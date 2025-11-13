@@ -1,8 +1,15 @@
-import { colors } from '../../lib/constant.js';
-import { parseTranscript } from './transcript-parser.js';
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { colors } from "../../lib/constant.js";
+import { parseTranscript } from "./transcript-parser.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Load default config
+const defaultConfig = JSON.parse(readFileSync(join(__dirname, "config.json"), "utf-8"));
 function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPercentage, format) {
-    let result = '';
-    if (format === 'full') {
+    let result = "";
+    if (format === "full") {
         if (showCount) {
             result += ` ${usedTokens.toLocaleString()}`;
             if (maxTokens > 0) {
@@ -28,22 +35,15 @@ function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPe
     return result;
 }
 export const claudeTokensPlugin = {
-    name: 'claude-tokens',
-    execute(context, config) {
+    name: "claude-tokens",
+    execute(context, userConfig) {
         try {
-            // Common options (from config root)
-            const prefix = config.prefix || '';
-            const suffix = config.suffix || '';
-            const icon = config.icon || '🔵';
-            const color = config.color || 'cyan';
-            // Specific options (from config.options)
+            // Merge default config with user config
+            const config = { ...defaultConfig, ...userConfig };
             const options = config.options;
-            const showPercentage = options?.showPercentage ?? true;
-            const showCount = options?.showCount ?? true;
-            const format = options?.format || 'compact';
             let usedTokens = 0;
             let maxTokens = 0;
-            let percentage = '0';
+            let percentage = "0";
             // Try to read transcript if available
             if (context.input.transcript_path) {
                 const tokenUsage = parseTranscript(context.input.transcript_path);
@@ -63,21 +63,24 @@ export const claudeTokensPlugin = {
                     usedTokens = context.input.usage.total_tokens || 0;
                     maxTokens = 200000;
                 }
-                percentage = maxTokens > 0 ? ((usedTokens / maxTokens) * 100).toFixed(1) : '0';
+                percentage =
+                    maxTokens > 0 ? ((usedTokens / maxTokens) * 100).toFixed(1) : "0";
             }
             // If no data available, display nothing
             if (usedTokens === 0 && maxTokens === 0) {
-                return { content: '' };
+                return { content: "" };
             }
-            const colorCode = colors[color] || colors.cyan;
-            const tokenContent = formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPercentage, format);
-            const content = `${prefix}${colorCode}${icon}${tokenContent}${colors.reset}${suffix}`;
+            const colorCode = colors[config.color];
+            const tokenContent = formatTokenContent(usedTokens, maxTokens, percentage, options.showCount, options.showPercentage, options.format);
+            const content = `${colorCode}${config.icon}${tokenContent}${colors.reset}`;
             return { content };
         }
         catch (error) {
             return {
-                content: '',
-                error: error instanceof Error ? error.message : 'Unknown error in claude-tokens plugin',
+                content: "",
+                error: error instanceof Error
+                    ? error.message
+                    : "Unknown error in claude-tokens plugin",
             };
         }
     },

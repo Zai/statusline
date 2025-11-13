@@ -1,5 +1,12 @@
 import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { colors } from '../../lib/constant.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Load default config
+const defaultConfig = JSON.parse(readFileSync(join(__dirname, 'config.json'), 'utf-8'));
 function getGitBranch(cwd) {
     try {
         const branch = execSync('git rev-parse --abbrev-ref HEAD', {
@@ -13,41 +20,79 @@ function getGitBranch(cwd) {
         return null;
     }
 }
-function getGitStatus(cwd) {
+function getFileCount(cwd) {
     try {
         const status = execSync('git status --porcelain', {
             cwd,
             encoding: 'utf8',
             stdio: ['pipe', 'pipe', 'ignore'],
         }).trim();
-        return status.length > 0;
+        if (!status)
+            return 0;
+        return status.split('\n').length;
     }
     catch (error) {
-        return false;
+        return 0;
+    }
+}
+function getLineStats(cwd) {
+    try {
+        const stats = execSync('git diff --numstat', {
+            cwd,
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'],
+        }).trim();
+        if (!stats)
+            return { additions: 0, deletions: 0 };
+        let additions = 0;
+        let deletions = 0;
+        const lines = stats.split('\n');
+        for (const line of lines) {
+            const parts = line.split('\t');
+            if (parts.length >= 2) {
+                additions += parseInt(parts[0]) || 0;
+                deletions += parseInt(parts[1]) || 0;
+            }
+        }
+        return { additions, deletions };
+    }
+    catch (error) {
+        return { additions: 0, deletions: 0 };
     }
 }
 export const gitPlugin = {
     name: 'git',
-    execute(context, config) {
+    execute(context, userConfig) {
         try {
+            // Merge default config with user config
+            const config = { ...defaultConfig, ...userConfig };
             const gitBranch = getGitBranch(context.currentDir);
             // If no git branch, display nothing
             if (!gitBranch) {
                 return { content: '' };
             }
-            // Common options (from config root)
-            const prefix = config.prefix || ' on ';
-            const suffix = config.suffix || '';
-            const icon = config.icon || '';
-            const color = config.color || 'green';
-            // Specific options (from config.options)
             const options = config.options;
-            const showStatus = options?.showStatus ?? true;
-            const hasChanges = showStatus ? getGitStatus(context.currentDir) : false;
-            const gitIcon = hasChanges ? (options?.dirtyIcon || '±') : '';
-            const branchColorName = hasChanges ? (options?.dirtyColor || 'yellow') : color;
-            const branchColor = colors[branchColorName] || colors.green;
-            const content = `${prefix}${icon}${branchColor}${gitBranch}${gitIcon}${colors.reset}${suffix}`;
+            // Build display parts
+            const parts = [];
+            // Branch
+            const branchColorCode = colors[config.color];
+            parts.push(`${config.icon}${branchColorCode}${gitBranch}${colors.reset}`);
+            // Stats
+            const statsParts = [];
+            if (options?.showFileCount) {
+                const fileCount = getFileCount(context.currentDir);
+                if (fileCount > 0)
+                    statsParts.push(`!${fileCount}`);
+            }
+            if (options?.showLineStats) {
+                const lineStats = getLineStats(context.currentDir);
+                if (lineStats.additions > 0 || lineStats.deletions > 0) {
+                    statsParts.push(`+${lineStats.additions}/-${lineStats.deletions}`);
+                }
+            }
+            const dirtyColorCode = colors[options?.dirtyColor];
+            parts.push(statsParts.length > 0 ? `${dirtyColorCode}${statsParts.join(' ')}${colors.reset}` : '');
+            const content = parts.filter(Boolean).join(' ');
             return { content };
         }
         catch (error) {

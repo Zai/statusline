@@ -1,4 +1,5 @@
 {
+  "separator": " | ",
   "plugins": [
     {
       "name": "directory",
@@ -9,15 +10,9 @@
     },
     {
       "name": "git",
-      "prefix": " → ",
       "options": {
-        "dirtyIcon": "✗",
         "dirtyColor": "red"
       }
-    },
-    {
-      "name": "node-version",
-      "enabled": false
     },
     {
       "name": "claude-tokens",

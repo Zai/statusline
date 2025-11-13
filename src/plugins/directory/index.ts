@@ -1,29 +1,34 @@
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
 import { colors } from '../../lib/constant.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface DirectoryOptions {
   showFullPath?: boolean;
 }
 
+// Load default config
+const defaultConfig: PluginConfig = JSON.parse(
+  readFileSync(join(__dirname, 'config.json'), 'utf-8')
+);
+
 export const directoryPlugin: Plugin = {
   name: 'directory',
 
-  execute(context: PluginContext, config: PluginConfig): PluginResult {
+  execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
-      // Common options (from config root)
-      const prefix = config.prefix || '';
-      const suffix = config.suffix || '';
-      const icon = config.icon || '📁';
-      const color = config.color || 'blue';
-
-      // Specific options (from config.options)
+      // Merge default config with user config
+      const config = { ...defaultConfig, ...userConfig };
       const options = config.options as DirectoryOptions | undefined;
-      const showFullPath = options?.showFullPath || false;
 
-      const displayPath = showFullPath ? context.currentDir : context.dirName;
-      const colorCode = colors[color as keyof typeof colors] || colors.blue;
+      const displayPath = options?.showFullPath ? context.currentDir : context.dirName;
+      const colorCode = colors[config.color as keyof typeof colors];
 
-      const content = `${prefix}${colors.bright}${colorCode}${icon} ${displayPath}${colors.reset}${suffix}`;
+      const content = `${colors.bright}${colorCode}${config.icon} ${displayPath}${colors.reset}`;
 
       return { content };
     } catch (error) {

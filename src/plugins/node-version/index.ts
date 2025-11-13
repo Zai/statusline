@@ -1,31 +1,35 @@
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
 import { colors } from '../../lib/constant.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface NodeVersionOptions {
   format?: 'full' | 'short';
 }
 
+// Load default config
+const defaultConfig: PluginConfig = JSON.parse(
+  readFileSync(join(__dirname, 'config.json'), 'utf-8')
+);
+
 export const nodeVersionPlugin: Plugin = {
   name: 'node-version',
 
-  execute(context: PluginContext, config: PluginConfig): PluginResult {
+  execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
-      // Common options (from config root)
-      const prefix = config.prefix || '';
-      const suffix = config.suffix || '';
-      const icon = config.icon || '⬢';
-      const color = config.color || 'green';
-
-      // Specific options (from config.options)
+      // Merge default config with user config
+      const config = { ...defaultConfig, ...userConfig };
       const options = config.options as NodeVersionOptions | undefined;
-      const format = options?.format || 'short';
 
       const nodeVersion = process.version;
-      const displayVersion = format === 'short' ? nodeVersion.replace(/^v/, '') : nodeVersion;
+      const displayVersion = options?.format === 'short' ? nodeVersion.replace(/^v/, '') : nodeVersion;
+      const colorCode = colors[config.color as keyof typeof colors];
 
-      const colorCode = colors[color as keyof typeof colors] || colors.green;
-
-      const content = `${prefix}${colorCode}${icon} ${displayVersion}${colors.reset}${suffix}`;
+      const content = `${colorCode}${config.icon} ${displayVersion}${colors.reset}`;
 
       return { content };
     } catch (error) {

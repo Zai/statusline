@@ -1,12 +1,28 @@
-import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
-import { colors } from '../../lib/constant.js';
-import { parseTranscript } from './transcript-parser.js';
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { colors } from "../../lib/constant.js";
+import {
+  Plugin,
+  PluginConfig,
+  PluginContext,
+  PluginResult,
+} from "../../types/plugin.js";
+import { parseTranscript } from "./transcript-parser.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface ClaudeTokensOptions {
   showPercentage?: boolean;
   showCount?: boolean;
-  format?: 'compact' | 'full';
+  format?: "compact" | "full";
 }
+
+// Load default config
+const defaultConfig: PluginConfig = JSON.parse(
+  readFileSync(join(__dirname, "config.json"), "utf-8")
+);
 
 function formatTokenContent(
   usedTokens: number,
@@ -14,11 +30,11 @@ function formatTokenContent(
   percentage: string,
   showCount: boolean,
   showPercentage: boolean,
-  format: 'compact' | 'full'
+  format: "compact" | "full"
 ): string {
-  let result = '';
+  let result = "";
 
-  if (format === 'full') {
+  if (format === "full") {
     if (showCount) {
       result += ` ${usedTokens.toLocaleString()}`;
       if (maxTokens > 0) {
@@ -31,7 +47,9 @@ function formatTokenContent(
   } else {
     // compact format
     if (showCount && showPercentage && maxTokens > 0) {
-      result += ` ${(usedTokens / 1000).toFixed(1)}k/${(maxTokens / 1000).toFixed(0)}k (${percentage}%)`;
+      result += ` ${(usedTokens / 1000).toFixed(1)}k/${(
+        maxTokens / 1000
+      ).toFixed(0)}k (${percentage}%)`;
     } else if (showCount) {
       result += ` ${(usedTokens / 1000).toFixed(1)}k`;
     } else if (showPercentage && maxTokens > 0) {
@@ -43,25 +61,17 @@ function formatTokenContent(
 }
 
 export const claudeTokensPlugin: Plugin = {
-  name: 'claude-tokens',
+  name: "claude-tokens",
 
-  execute(context: PluginContext, config: PluginConfig): PluginResult {
+  execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
-      // Common options (from config root)
-      const prefix = config.prefix || '';
-      const suffix = config.suffix || '';
-      const icon = config.icon || '🔵';
-      const color = config.color || 'cyan';
-
-      // Specific options (from config.options)
+      // Merge default config with user config
+      const config = { ...defaultConfig, ...userConfig };
       const options = config.options as ClaudeTokensOptions | undefined;
-      const showPercentage = options?.showPercentage ?? true;
-      const showCount = options?.showCount ?? true;
-      const format = options?.format || 'compact';
 
       let usedTokens = 0;
       let maxTokens = 0;
-      let percentage = '0';
+      let percentage = "0";
 
       // Try to read transcript if available
       if (context.input.transcript_path) {
@@ -84,24 +94,35 @@ export const claudeTokensPlugin: Plugin = {
           maxTokens = 200000;
         }
 
-        percentage = maxTokens > 0 ? ((usedTokens / maxTokens) * 100).toFixed(1) : '0';
+        percentage =
+          maxTokens > 0 ? ((usedTokens / maxTokens) * 100).toFixed(1) : "0";
       }
 
       // If no data available, display nothing
       if (usedTokens === 0 && maxTokens === 0) {
-        return { content: '' };
+        return { content: "" };
       }
 
-      const colorCode = colors[color as keyof typeof colors] || colors.cyan;
-      const tokenContent = formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPercentage, format);
+      const colorCode = colors[config.color as keyof typeof colors];
+      const tokenContent = formatTokenContent(
+        usedTokens,
+        maxTokens,
+        percentage,
+        options!.showCount!,
+        options!.showPercentage!,
+        options!.format!
+      );
 
-      const content = `${prefix}${colorCode}${icon}${tokenContent}${colors.reset}${suffix}`;
+      const content = `${colorCode}${config.icon}${tokenContent}${colors.reset}`;
 
       return { content };
     } catch (error) {
       return {
-        content: '',
-        error: error instanceof Error ? error.message : 'Unknown error in claude-tokens plugin',
+        content: "",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error in claude-tokens plugin",
       };
     }
   },
