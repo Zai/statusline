@@ -16,7 +16,7 @@ const defaultConfig: PluginConfig = JSON.parse(
   readFileSync(join(__dirname, 'config.json'), 'utf-8')
 );
 
-export const directoryPlugin: Plugin = {
+export default {
   name: 'directory',
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
@@ -38,4 +38,4 @@ export const directoryPlugin: Plugin = {
       };
     }
   },
-};
+} as Plugin;

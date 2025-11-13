@@ -4,14 +4,22 @@ This guide explains how to create custom plugins for the Claude Code statusline.
 
 ## Plugin Architecture
 
+The statusline uses a **dynamic plugin loading system**. Plugins are automatically loaded from the `config.json` file - no manual registration required!
+
 Each plugin is **autonomous** and follows this structure:
 
 ```
 src/plugins/my-plugin/
-├── index.ts        # Plugin implementation
+├── index.ts        # Plugin implementation (must use export default)
 ├── config.json     # Default configuration
 └── README.md       # Plugin documentation
 ```
+
+**Key concepts:**
+- 🚀 **Dynamic loading**: Plugins are loaded on-demand via `import()`
+- 📦 **Export default**: All plugins must use `export default`
+- ⚙️ **Auto-discovery**: Just add plugin name to config and it loads automatically
+- ❌ **Error handling**: Failed plugins show `❌ plugin-name` in statusline
 
 ## Creating a New Plugin
 
@@ -38,6 +46,8 @@ mkdir -p src/plugins/my-plugin
 
 ### 3. Implement the Plugin (`index.ts`)
 
+**IMPORTANT:** Use `export default` for the plugin object!
+
 ```typescript
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
@@ -57,7 +67,8 @@ const defaultConfig: PluginConfig = JSON.parse(
   readFileSync(join(__dirname, 'config.json'), 'utf-8')
 );
 
-export const myPlugin: Plugin = {
+// Use export default (required for dynamic loading)
+export default {
   name: 'my-plugin',
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
@@ -85,23 +96,12 @@ export const myPlugin: Plugin = {
       };
     }
   },
-};
+} as Plugin;
 ```
 
-### 4. Register the Plugin
+### 4. Enable Your Plugin
 
-In `src/lib/plugin-manager.ts`:
-
-```typescript
-import { myPlugin } from '../plugins/my-plugin/index.js';
-
-// Inside constructor
-this.registerPlugin(myPlugin);
-```
-
-### 5. Add to User Configuration
-
-Users enable your plugin by adding it to their `config.json`:
+**No registration needed!** Simply add your plugin to `config.json`:
 
 ```json
 {
@@ -112,6 +112,15 @@ Users enable your plugin by adding it to their `config.json`:
   ]
 }
 ```
+
+The plugin will be **automatically loaded** when the statusline starts! ✨
+
+**How it works:**
+1. PluginManager reads `config.json`
+2. Sees `"my-plugin"` in the list
+3. Dynamically imports from `src/plugins/my-plugin/index.js`
+4. Validates the plugin structure
+5. Registers and executes it
 
 The order in the array determines display order.
 
@@ -278,15 +287,22 @@ Create a `README.md` in your plugin directory documenting:
 
 ## Plugin Lifecycle
 
-1. **Registration**: Plugin is registered in `PluginManager` constructor
-2. **User Config Load**: User's `config.json` is loaded
-3. **Execution**: For each plugin in user's config array (in order):
+1. **User Config Load**: User's `config.json` is loaded
+2. **Dynamic Loading**: PluginManager dynamically imports each plugin listed in config:
+   - Reads plugin name from config array
+   - Calls `import(\`../plugins/${name}/index.js\`)`
+   - Validates plugin structure (must have `name` and `execute`)
+   - Registers plugin in internal Map
+   - On error: stores error and displays `❌ plugin-name` in statusline
+3. **Execution**: For each registered plugin (in order):
    - Plugin receives `context` and `userConfig`
    - Plugin loads its `config.json` (default config)
    - Plugin merges configs: `{ ...defaultConfig, ...userConfig }`
    - Plugin executes its logic
    - Plugin returns `PluginResult`
 4. **Assembly**: Results are joined with separator
+
+**Key advantage:** Only plugins in the config are loaded - no wasted memory or imports!
 
 ## Examples
 

@@ -4,8 +4,9 @@ A customizable and modular statusline for Claude Code based on a configurable pl
 
 ## Features
 
-- 🔌 **Modular plugin system**: Enable/disable plugins as needed
+- 🔌 **Dynamic plugin system**: Plugins loaded on-demand from config
 - ⚙️ **JSON configuration**: Easy customization via `config.json`
+- 🚀 **Zero-config required**: Works out-of-the-box with sensible defaults
 - 📁 **Directory Plugin**: Displays current directory
 - 🔀 **Git Plugin**: Shows branch and modification status
 - ⬢ **Node Version Plugin**: Displays Node.js version
@@ -13,6 +14,7 @@ A customizable and modular statusline for Claude Code based on a configurable pl
 - 🎨 ANSI colors for elegant display
 - ⚡ Written in TypeScript with fast execution
 - 🔄 Automatic updates in Claude Code
+- ❌ **Visible error handling**: Failed plugins show as `❌ plugin-name`
 
 ## Prerequisites
 
@@ -61,11 +63,12 @@ Or with absolute path:
 
 ## Plugin Configuration
 
-The statusline uses a **modular plugin system** where each plugin is autonomous and self-configures:
+The statusline uses a **dynamic plugin system** where plugins are loaded on-demand:
 
 1. **Default configuration**: Each plugin loads its own `config.json` with default values
 2. **User configuration**: Optional `config.json` file at project root to enable/customize plugins
-3. **Automatic merging**: Plugins merge their defaults with user overrides
+3. **Dynamic loading**: Only plugins listed in `config.json` are loaded into memory
+4. **Automatic merging**: Plugins merge their defaults with user overrides
 
 **You don't need to create `config.json` to use the statusline** - it works out-of-the-box!
 
@@ -120,13 +123,15 @@ Override any plugin setting by adding fields:
 - **`color`**: Text color (`"blue"`, `"green"`, `"cyan"`, `"yellow"`, `"magenta"`, `"red"`, `"gray"`)
 - **`options`**: Plugin-specific options (see plugin docs)
 
-### How Merging Works
+### How Dynamic Loading Works
 
-Each plugin is **autonomous** and manages its own configuration:
+The plugin system is **fully dynamic**:
 
-1. Plugin loads its default `config.json`
-2. User provides overrides in root `config.json`
-3. Plugin merges: `{ ...defaults, ...userConfig }`
+1. **Load config**: System reads `config.json` to see which plugins are needed
+2. **Dynamic import**: Only listed plugins are loaded via `import()`
+3. **Merge config**: Plugin loads its default `config.json` and merges with user config
+4. **Execute**: Plugin runs its logic and returns results
+5. **Error handling**: If a plugin fails to load, `❌ plugin-name` appears in statusline
 
 **Example:**
 
@@ -195,7 +200,13 @@ Shows Claude Code token usage with count and percentage.
 
 ### Creating Custom Plugins
 
-Want to create your own plugin? See the **[Plugin Development Guide](src/plugins/README.md)** for detailed instructions on creating autonomous plugins.
+Want to create your own plugin? See the **[Plugin Development Guide](src/plugins/README.md)** for detailed instructions.
+
+**Key benefits of the dynamic system:**
+- 🚀 **No registration needed**: Just drop your plugin in `src/plugins/` folder
+- 📝 **Add to config**: Enable it by adding to `config.json`
+- 🔄 **Hot-swappable**: Change plugin list without touching source code
+- ❌ **Error-safe**: Invalid plugins show `❌` without crashing
 
 ### Enabling/Disabling Plugins
 
@@ -416,17 +427,18 @@ export const colors = {
 
 ### Creating a Custom Plugin
 
-Creating your own plugin is straightforward. Each plugin is autonomous and self-configures.
+Creating your own plugin is straightforward with the dynamic loading system!
 
 **For detailed step-by-step instructions, see the [Plugin Development Guide](src/plugins/README.md).**
 
 **Quick overview:**
 
-1. Create `src/plugins/my-plugin/config.json` with defaults (no `enabled` or `order`)
-2. Create `src/plugins/my-plugin/index.ts` with your plugin logic
-3. Plugin loads its config and merges with user overrides
-4. Register plugin in `plugin-manager.ts`
-5. Users enable it by adding `{ "name": "my-plugin" }` to their config
+1. Create `src/plugins/my-plugin/config.json` with defaults
+2. Create `src/plugins/my-plugin/index.ts` with your plugin logic using `export default`
+3. Add `{ "name": "my-plugin" }` to your `config.json`
+4. Done! The plugin is automatically loaded ✨
+
+**No manual registration needed** - the system dynamically loads plugins from the config!
 
 See the [guide](src/plugins/README.md) for complete examples and best practices!
 

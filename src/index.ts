@@ -38,6 +38,7 @@ async function main(): Promise<void> {
 
     // Initialize plugin manager and execute plugins
     const pluginManager = new PluginManager();
+    await pluginManager.init();
     const statusLine = await pluginManager.execute(context);
 
     // Display statusline

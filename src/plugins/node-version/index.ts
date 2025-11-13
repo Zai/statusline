@@ -16,7 +16,7 @@ const defaultConfig: PluginConfig = JSON.parse(
   readFileSync(join(__dirname, 'config.json'), 'utf-8')
 );
 
-export const nodeVersionPlugin: Plugin = {
+export default {
   name: 'node-version',
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
@@ -39,4 +39,4 @@ export const nodeVersionPlugin: Plugin = {
       };
     }
   },
-};
+} as Plugin;

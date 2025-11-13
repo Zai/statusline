@@ -60,7 +60,7 @@ function formatTokenContent(
   return result;
 }
 
-export const claudeTokensPlugin: Plugin = {
+export default {
   name: "claude-tokens",
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
@@ -126,4 +126,4 @@ export const claudeTokensPlugin: Plugin = {
       };
     }
   },
-};
+} as Plugin;

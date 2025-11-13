@@ -60,7 +60,7 @@ function getLineStats(cwd) {
         return { additions: 0, deletions: 0 };
     }
 }
-export const gitPlugin = {
+export default {
     name: 'git',
     execute(context, userConfig) {
         try {

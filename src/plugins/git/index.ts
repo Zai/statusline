@@ -75,7 +75,7 @@ function getLineStats(cwd: string): { additions: number; deletions: number } {
   }
 }
 
-export const gitPlugin: Plugin = {
+export default {
   name: 'git',
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
@@ -125,4 +125,4 @@ export const gitPlugin: Plugin = {
       };
     }
   },
-};
+} as Plugin;

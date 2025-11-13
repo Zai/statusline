@@ -2,10 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Plugin, PluginConfig, PluginContext, PluginResult } from '../types/plugin.js';
-import { directoryPlugin } from '../plugins/directory/index.js';
-import { gitPlugin } from '../plugins/git/index.js';
-import { nodeVersionPlugin } from '../plugins/node-version/index.js';
-import { claudeTokensPlugin } from '../plugins/claude-tokens/index.js';
+import { colors } from './constant.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,14 +15,9 @@ interface Config {
 export class PluginManager {
   private plugins: Map<string, Plugin> = new Map();
   private config: Config;
+  private loadErrors: Map<string, string> = new Map();
 
   constructor(configPath?: string) {
-    // Register available plugins
-    this.registerPlugin(directoryPlugin);
-    this.registerPlugin(gitPlugin);
-    this.registerPlugin(nodeVersionPlugin);
-    this.registerPlugin(claudeTokensPlugin);
-
     // Load user configuration (optional)
     const defaultConfigPath = join(__dirname, '../../config.json');
     const actualConfigPath = configPath || defaultConfigPath;
@@ -46,6 +38,41 @@ export class PluginManager {
 
     // Merge configurations
     this.config = this.mergeConfigs(userConfig);
+  }
+
+  /**
+   * Initialize and dynamically load plugins based on config
+   */
+  public async init(): Promise<void> {
+    const pluginNames = this.config.plugins.map((p) => p.name);
+
+    // Load each plugin dynamically
+    for (const pluginName of pluginNames) {
+      try {
+        // Dynamic import from plugins folder
+        const pluginModule = await import(`../plugins/${pluginName}/index.js`);
+        const plugin = pluginModule.default as Plugin;
+
+        // Validate plugin structure
+        if (!plugin || !plugin.name || !plugin.execute) {
+          throw new Error(`Invalid plugin structure in ${pluginName}`);
+        }
+
+        // Validate plugin name matches
+        if (plugin.name !== pluginName) {
+          console.warn(
+            `Warning: Plugin name mismatch. Expected "${pluginName}", got "${plugin.name}"`
+          );
+        }
+
+        // Register the plugin
+        this.registerPlugin(plugin);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        this.loadErrors.set(pluginName, errorMsg);
+        console.error(`Failed to load plugin "${pluginName}": ${errorMsg}`);
+      }
+    }
   }
 
   private mergeConfigs(userConfig: Config | null): Config {
@@ -71,8 +98,18 @@ export class PluginManager {
     for (const userPluginConfig of this.config.plugins) {
       const plugin = this.plugins.get(userPluginConfig.name);
 
+      // If plugin failed to load, show error in statusline
       if (!plugin) {
-        errors.push(`Plugin "${userPluginConfig.name}" not found`);
+        const loadError = this.loadErrors.get(userPluginConfig.name);
+        if (loadError) {
+          // Show visible error in statusline
+          results.push(`${colors.red}❌ ${userPluginConfig.name}${colors.reset}`);
+          errors.push(`Plugin "${userPluginConfig.name}" failed to load: ${loadError}`);
+        } else {
+          // Plugin not found at all
+          results.push(`${colors.red}❌ ${userPluginConfig.name}${colors.reset}`);
+          errors.push(`Plugin "${userPluginConfig.name}" not found`);
+        }
         continue;
       }
 

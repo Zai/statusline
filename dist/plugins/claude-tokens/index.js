@@ -34,7 +34,7 @@ function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPe
     }
     return result;
 }
-export const claudeTokensPlugin = {
+export default {
     name: "claude-tokens",
     execute(context, userConfig) {
         try {
