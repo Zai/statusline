@@ -1,0 +1,31 @@
+{
+  "plugins": [
+    {
+      "name": "directory",
+      "icon": "📂",
+      "options": {
+        "showFullPath": true
+      }
+    },
+    {
+      "name": "git",
+      "prefix": " → ",
+      "options": {
+        "dirtyIcon": "✗",
+        "dirtyColor": "red"
+      }
+    },
+    {
+      "name": "node-version",
+      "enabled": false
+    },
+    {
+      "name": "claude-tokens",
+      "icon": "📊",
+      "color": "magenta",
+      "options": {
+        "format": "full"
+      }
+    }
+  ]
+}

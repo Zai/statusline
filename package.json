@@ -1,0 +1,24 @@
+{
+  "name": "statusline",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "debug": "SAVE_INPUT=1 pnpm dev",
+    "dev": "tsx src/index.ts",
+    "build": "tsc && npm run copy-configs",
+    "copy-configs": "cp src/plugins/*/config.json dist/plugins/ 2>/dev/null || mkdir -p dist/plugins/directory dist/plugins/git dist/plugins/node-version dist/plugins/claude-tokens && cp src/plugins/directory/config.json dist/plugins/directory/ && cp src/plugins/git/config.json dist/plugins/git/ && cp src/plugins/node-version/config.json dist/plugins/node-version/ && cp src/plugins/claude-tokens/config.json dist/plugins/claude-tokens/",
+    "watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Zai",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
+}
