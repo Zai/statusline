@@ -16,7 +16,7 @@ interface GitOptions {
 
 // Load default config
 const defaultConfig: PluginConfig = JSON.parse(
-  readFileSync(join(__dirname, 'config.json'), 'utf-8')
+  readFileSync(join(__dirname, 'default.json'), 'utf-8')
 );
 
 function getGitBranch(cwd: string): string | null {

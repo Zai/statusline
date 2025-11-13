@@ -1,0 +1,10 @@
+{
+  "name": "claude-tokens",
+  "icon": "🔵",
+  "color": "cyan",
+  "options": {
+    "showPercentage": true,
+    "showCount": true,
+    "format": "compact"
+  }
+}

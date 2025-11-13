@@ -11,7 +11,7 @@ Each plugin is **autonomous** and follows this structure:
 ```
 src/plugins/my-plugin/
 ├── index.ts        # Plugin implementation (must use export default)
-├── config.json     # Default configuration
+├── default.json    # Default configuration
 └── README.md       # Plugin documentation
 ```
 
@@ -29,7 +29,7 @@ src/plugins/my-plugin/
 mkdir -p src/plugins/my-plugin
 ```
 
-### 2. Create the Default Configuration (`config.json`)
+### 2. Create the Default Configuration (`default.json`)
 
 ```json
 {
@@ -64,7 +64,7 @@ interface MyPluginOptions {
 
 // Load default config
 const defaultConfig: PluginConfig = JSON.parse(
-  readFileSync(join(__dirname, 'config.json'), 'utf-8')
+  readFileSync(join(__dirname, 'default.json'), 'utf-8')
 );
 
 // Use export default (required for dynamic loading)
@@ -175,14 +175,14 @@ interface PluginResult {
 
 Plugins are **autonomous** and handle their own configuration merging:
 
-1. **Default config** is loaded from `config.json`
+1. **Default config** is loaded from `default.json`
 2. **User config** is passed via `execute(context, userConfig)`
 3. **Merge** happens inside the plugin: `{ ...defaultConfig, ...userConfig }`
 
 Example:
 
 ```typescript
-// Plugin's config.json (default)
+// Plugin's default.json
 {
   "name": "my-plugin",
   "icon": "🔧",
@@ -190,7 +190,7 @@ Example:
   "options": { "myOption": true }
 }
 
-// User's config.json
+// User's config.json (root)
 {
   "plugins": [
     {
@@ -238,7 +238,7 @@ if (!data) {
 
 ### 3. No Hardcoded Defaults!
 
-**IMPORTANT:** All default values must be in `config.json`, not in code!
+**IMPORTANT:** All default values must be in `default.json`, not in code!
 
 **❌ Bad (hardcoded defaults):**
 ```typescript
@@ -247,7 +247,7 @@ const color = config.color || 'cyan';       // NO!
 const myOption = options?.myOption ?? true; // NO!
 ```
 
-**✅ Good (defaults from config.json):**
+**✅ Good (defaults from default.json):**
 ```typescript
 // Merge happens at the top of execute()
 const config = { ...defaultConfig, ...userConfig };
@@ -258,7 +258,7 @@ const color = config.color;
 const myOption = options?.myOption;
 ```
 
-After the merge, all values are guaranteed to exist from `defaultConfig`. Only use fallbacks for type safety (e.g., `colors[color as keyof typeof colors] || colors.cyan`).
+After the merge, all values are guaranteed to exist from `defaultConfig` (loaded from `default.json`). Only use fallbacks for type safety (e.g., `colors[color as keyof typeof colors] || colors.cyan`).
 
 ### 4. Use ANSI Color Codes
 
@@ -296,7 +296,7 @@ Create a `README.md` in your plugin directory documenting:
    - On error: stores error and displays `❌ plugin-name` in statusline
 3. **Execution**: For each registered plugin (in order):
    - Plugin receives `context` and `userConfig`
-   - Plugin loads its `config.json` (default config)
+   - Plugin loads its `default.json` (default config)
    - Plugin merges configs: `{ ...defaultConfig, ...userConfig }`
    - Plugin executes its logic
    - Plugin returns `PluginResult`

@@ -6,7 +6,7 @@ import { parseTranscript } from "./transcript-parser.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Load default config
-const defaultConfig = JSON.parse(readFileSync(join(__dirname, "config.json"), "utf-8"));
+const defaultConfig = JSON.parse(readFileSync(join(__dirname, "default.json"), "utf-8"));
 function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPercentage, format) {
     let result = "";
     if (format === "full") {

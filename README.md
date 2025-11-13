@@ -65,7 +65,7 @@ Or with absolute path:
 
 The statusline uses a **dynamic plugin system** where plugins are loaded on-demand:
 
-1. **Default configuration**: Each plugin loads its own `config.json` with default values
+1. **Default configuration**: Each plugin loads its own `default.json` with default values
 2. **User configuration**: Optional `config.json` file at project root to enable/customize plugins
 3. **Dynamic loading**: Only plugins listed in `config.json` are loaded into memory
 4. **Automatic merging**: Plugins merge their defaults with user overrides
@@ -129,13 +129,13 @@ The plugin system is **fully dynamic**:
 
 1. **Load config**: System reads `config.json` to see which plugins are needed
 2. **Dynamic import**: Only listed plugins are loaded via `import()`
-3. **Merge config**: Plugin loads its default `config.json` and merges with user config
+3. **Merge config**: Plugin loads its `default.json` and merges with user config
 4. **Execute**: Plugin runs its logic and returns results
 5. **Error handling**: If a plugin fails to load, `❌ plugin-name` appears in statusline
 
 **Example:**
 
-Plugin's default (from `src/plugins/directory/config.json`):
+Plugin's default (from `src/plugins/directory/default.json`):
 ```json
 {
   "name": "directory",
@@ -313,19 +313,19 @@ statusline/
 │   │   ├── README.md              # 📖 Plugin Development Guide
 │   │   ├── directory/
 │   │   │   ├── README.md          # 📖 Directory plugin documentation
-│   │   │   ├── config.json        # ⭐ Default configuration
+│   │   │   ├── default.json       # ⭐ Default configuration
 │   │   │   └── index.ts           # Directory plugin
 │   │   ├── git/
 │   │   │   ├── README.md          # 📖 Git plugin documentation
-│   │   │   ├── config.json        # ⭐ Default configuration
+│   │   │   ├── default.json       # ⭐ Default configuration
 │   │   │   └── index.ts           # Git plugin
 │   │   ├── node-version/
 │   │   │   ├── README.md          # 📖 Node version plugin documentation
-│   │   │   ├── config.json        # ⭐ Default configuration
+│   │   │   ├── default.json       # ⭐ Default configuration
 │   │   │   └── index.ts           # Node version plugin
 │   │   └── claude-tokens/
 │   │       ├── README.md          # 📖 Claude tokens plugin documentation
-│   │       ├── config.json        # ⭐ Default configuration
+│   │       ├── default.json       # ⭐ Default configuration
 │   │       ├── index.ts           # Claude tokens plugin
 │   │       └── transcript-parser.ts  # Transcript parsing utility
 │   └── index.ts                   # Main entry point
@@ -334,13 +334,13 @@ statusline/
 │   ├── lib/
 │   ├── plugins/
 │   │   ├── directory/
-│   │   │   └── config.json        # ⭐ Default config (copied)
+│   │   │   └── default.json       # ⭐ Default config (copied)
 │   │   ├── git/
-│   │   │   └── config.json        # ⭐ Default config (copied)
+│   │   │   └── default.json       # ⭐ Default config (copied)
 │   │   ├── node-version/
-│   │   │   └── config.json        # ⭐ Default config (copied)
+│   │   │   └── default.json       # ⭐ Default config (copied)
 │   │   └── claude-tokens/
-│   │       └── config.json        # ⭐ Default config (copied)
+│   │       └── default.json       # ⭐ Default config (copied)
 │   └── index.js
 ├── config.json                    # User configuration (optional - for overrides)
 ├── config.json.example            # Customization examples
@@ -433,7 +433,7 @@ Creating your own plugin is straightforward with the dynamic loading system!
 
 **Quick overview:**
 
-1. Create `src/plugins/my-plugin/config.json` with defaults
+1. Create `src/plugins/my-plugin/default.json` with defaults
 2. Create `src/plugins/my-plugin/index.ts` with your plugin logic using `export default`
 3. Add `{ "name": "my-plugin" }` to your `config.json`
 4. Done! The plugin is automatically loaded ✨

@@ -5,7 +5,7 @@ import { colors } from '../../lib/constant.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Load default config
-const defaultConfig = JSON.parse(readFileSync(join(__dirname, 'config.json'), 'utf-8'));
+const defaultConfig = JSON.parse(readFileSync(join(__dirname, 'default.json'), 'utf-8'));
 export default {
     name: 'directory',
     execute(context, userConfig) {

@@ -1,0 +1,8 @@
+{
+  "name": "node-version",
+  "icon": "⬢",
+  "color": "green",
+  "options": {
+    "format": "short"
+  }
+}

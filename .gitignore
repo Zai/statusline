@@ -11,8 +11,9 @@ Thumbs.db
 *.swp
 *.swo
 
-# Configs
-config.json
+# User config (root level only)
+# Note: Plugin default.json files are committed
+/config.json
 
 # Fixtures
 fixtures/

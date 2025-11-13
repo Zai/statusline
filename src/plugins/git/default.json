@@ -1,0 +1,10 @@
+{
+  "name": "git",
+  "icon": "",
+  "color": "green",
+  "options": {
+    "showFileCount": true,
+    "showLineStats": true,
+    "dirtyColor": "yellow"
+  }
+}

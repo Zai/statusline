@@ -8,7 +8,7 @@
     "debug": "SAVE_INPUT=1 pnpm dev",
     "dev": "tsx src/index.ts",
     "build": "tsc && npm run copy-configs",
-    "copy-configs": "cp src/plugins/*/config.json dist/plugins/ 2>/dev/null || mkdir -p dist/plugins/directory dist/plugins/git dist/plugins/node-version dist/plugins/claude-tokens && cp src/plugins/directory/config.json dist/plugins/directory/ && cp src/plugins/git/config.json dist/plugins/git/ && cp src/plugins/node-version/config.json dist/plugins/node-version/ && cp src/plugins/claude-tokens/config.json dist/plugins/claude-tokens/",
+    "copy-configs": "cp src/plugins/*/default.json dist/plugins/ 2>/dev/null || mkdir -p dist/plugins/directory dist/plugins/git dist/plugins/node-version dist/plugins/claude-tokens && cp src/plugins/directory/default.json dist/plugins/directory/ && cp src/plugins/git/default.json dist/plugins/git/ && cp src/plugins/node-version/default.json dist/plugins/node-version/ && cp src/plugins/claude-tokens/default.json dist/plugins/claude-tokens/",
     "watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

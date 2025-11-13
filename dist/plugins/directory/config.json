@@ -1,0 +1,8 @@
+{
+  "name": "directory",
+  "icon": "📁",
+  "color": "blue",
+  "options": {
+    "showFullPath": false
+  }
+}
