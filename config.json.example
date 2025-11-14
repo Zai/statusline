@@ -3,7 +3,7 @@
   "plugins": [
     {
       "name": "directory",
-      "icon": "📂",
+      "prefix": "📂",
       "options": {
         "showFullPath": true
       }
@@ -16,7 +16,7 @@
     },
     {
       "name": "claude-tokens",
-      "icon": "📊",
+      "prefix": "📊",
       "color": "magenta",
       "options": {
         "format": "full"

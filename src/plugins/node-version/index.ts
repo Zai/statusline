@@ -29,7 +29,7 @@ export default {
       const displayVersion = options?.format === 'short' ? nodeVersion.replace(/^v/, '') : nodeVersion;
       const colorCode = colors[config.color as keyof typeof colors];
 
-      const content = `${colorCode}${config.icon} ${displayVersion}${colors.reset}`;
+      const content = `${colorCode}${config.prefix} ${displayVersion}${colors.reset}`;
 
       return { content };
     } catch (error) {

@@ -1,5 +1,5 @@
 {
   "name": "claude-version",
-  "icon": "🤖",
+  "prefix": "Claude:",
   "color": "cyan"
 }

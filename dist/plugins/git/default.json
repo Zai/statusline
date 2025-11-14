@@ -1,6 +1,6 @@
 {
   "name": "git",
-  "icon": "",
+  "prefix": "",
   "color": "green",
   "options": {
     "showFileCount": true,

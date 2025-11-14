@@ -6,7 +6,7 @@ Displays the current working directory in the statusline.
 
 - Shows directory name by default
 - Option to show full path
-- Customizable icon and color
+- Customizable prefix and color
 - Bright text style for better visibility
 
 ## Default Configuration
@@ -14,7 +14,7 @@ Displays the current working directory in the statusline.
 ```json
 {
   "name": "directory",
-  "icon": "📁",
+  "prefix": "📁",
   "color": "blue",
   "options": {
     "showFullPath": false
@@ -26,7 +26,7 @@ Displays the current working directory in the statusline.
 
 ### Common Options
 
-- **`icon`** (string): Icon to display before the directory name
+- **`prefix`** (string): Prefix to display before the directory name
   - Default: `"📁"`
   - Example: `"📂"`, `"🗂️"`, `""`
 
@@ -74,14 +74,14 @@ Displays the current working directory in the statusline.
 
 **Output:** `📁 /Users/name/projects/statusline`
 
-### Custom Icon and Color
+### Custom Prefix and Color
 
 ```json
 {
   "plugins": [
     {
       "name": "directory",
-      "icon": "📂",
+      "prefix": "📂",
       "color": "cyan"
     }
   ]
@@ -90,14 +90,14 @@ Displays the current working directory in the statusline.
 
 **Output:** `📂 statusline` (in cyan)
 
-### Minimal (no icon)
+### Minimal (no prefix)
 
 ```json
 {
   "plugins": [
     {
       "name": "directory",
-      "icon": ""
+      "prefix": ""
     }
   ]
 }

@@ -76,7 +76,7 @@ export default {
             const parts = [];
             // Branch
             const branchColorCode = colors[config.color];
-            parts.push(`${config.icon}${branchColorCode}${gitBranch}${colors.reset}`);
+            parts.push(`${config.prefix}${branchColorCode}${gitBranch}${colors.reset}`);
             // Stats
             const statsParts = [];
             if (options?.showFileCount) {

@@ -15,7 +15,7 @@ export default {
             const options = config.options;
             const displayPath = options?.showFullPath ? context.currentDir : context.dirName;
             const colorCode = colors[config.color];
-            const content = `${colors.bright}${colorCode}${config.icon} ${displayPath}${colors.reset}`;
+            const content = `${colors.bright}${colorCode}${config.prefix} ${displayPath}${colors.reset}`;
             return { content };
         }
         catch (error) {

@@ -6,7 +6,7 @@ Displays the current Node.js version in the statusline.
 
 - Shows Node.js version from `process.version`
 - Supports short and full format
-- Customizable icon and color
+- Customizable prefix and color
 - No external dependencies
 
 ## Default Configuration
@@ -14,7 +14,7 @@ Displays the current Node.js version in the statusline.
 ```json
 {
   "name": "node-version",
-  "icon": "⬢",
+  "prefix": "Node:",
   "color": "green",
   "options": {
     "format": "short"
@@ -26,9 +26,9 @@ Displays the current Node.js version in the statusline.
 
 ### Common Options
 
-- **`icon`** (string): Icon to display before the version
-  - Default: `"⬢"` (hexagon, Node.js logo)
-  - Example: `"⬢"`, `"📦"`, `"node"`, `""`
+- **`prefix`** (string): Prefix to display before the version
+  - Default: `"Node:"`
+  - Example: `"Node:"`, `"⬢"`, `"📦"`, `"node"`, `""`
 
 - **`color`** (string): Text color for the version
   - Default: `"green"`
@@ -56,7 +56,7 @@ Displays the current Node.js version in the statusline.
 }
 ```
 
-**Output:** `⬢ 18.0.0`
+**Output:** `Node: 18.0.0`
 
 ### Full Format
 
@@ -73,16 +73,16 @@ Displays the current Node.js version in the statusline.
 }
 ```
 
-**Output:** `⬢ v18.0.0`
+**Output:** `Node: v18.0.0`
 
-### Custom Icon and Color
+### Custom Prefix and Color
 
 ```json
 {
   "plugins": [
     {
       "name": "node-version",
-      "icon": "📦",
+      "prefix": "📦",
       "color": "cyan"
     }
   ]
@@ -91,14 +91,14 @@ Displays the current Node.js version in the statusline.
 
 **Output:** `📦 18.0.0` (in cyan)
 
-### Minimal (no icon)
+### Minimal (no prefix)
 
 ```json
 {
   "plugins": [
     {
       "name": "node-version",
-      "icon": ""
+      "prefix": ""
     }
   ]
 }
@@ -113,7 +113,7 @@ Displays the current Node.js version in the statusline.
   "plugins": [
     {
       "name": "node-version",
-      "icon": "node"
+      "prefix": "node"
     }
   ]
 }
@@ -140,17 +140,17 @@ Displays the current Node.js version in the statusline.
 
 ```bash
 # Default
-⬢ 18.0.0
+Node: 18.0.0
 
 # Full format
-⬢ v18.0.0
+Node: v18.0.0
 
 # Custom style
 📦 20.11.0
 
 # Different colors
-⬢ 18.0.0  # (in green - default)
-⬢ 18.0.0  # (in cyan)
+Node: 18.0.0  # (in green - default)
+Node: 18.0.0  # (in cyan)
 ```
 
 ## Notes

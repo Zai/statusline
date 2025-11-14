@@ -1,6 +1,6 @@
 {
   "name": "node-version",
-  "icon": "⬢",
+  "prefix": "Node:",
   "color": "green",
   "options": {
     "format": "short"

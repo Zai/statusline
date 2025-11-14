@@ -99,7 +99,7 @@ export default {
         options!.format!
       );
 
-      const content = `${colorCode}${config.icon}${tokenContent}${colors.reset}`;
+      const content = `${colorCode}${config.prefix}${tokenContent}${colors.reset}`;
 
       return { content };
     } catch (error) {

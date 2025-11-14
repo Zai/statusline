@@ -5,7 +5,7 @@ Displays the current Claude Code version in the statusline.
 ## Features
 
 - Shows Claude Code version from input data
-- Customizable icon and color
+- Customizable prefix and color
 - Simple and lightweight
 - Hides when version is unavailable
 
@@ -14,7 +14,7 @@ Displays the current Claude Code version in the statusline.
 ```json
 {
   "name": "claude-version",
-  "icon": "🤖",
+  "prefix": "Claude:",
   "color": "cyan"
 }
 ```
@@ -23,9 +23,9 @@ Displays the current Claude Code version in the statusline.
 
 ### Common Options
 
-- **`icon`** (string): Icon to display before the version
-  - Default: `"🤖"` (robot face)
-  - Example: `"🤖"`, `"📟"`, `"claude"`, `"v"`
+- **`prefix`** (string): Prefix to display before the version
+  - Default: `"Claude:"`
+  - Example: `"Claude:"`, `"🤖"`, `"📟"`, `"v"`
 
 - **`color`** (string): Text color for the version
   - Default: `"cyan"`
@@ -45,16 +45,16 @@ Displays the current Claude Code version in the statusline.
 }
 ```
 
-**Output:** `🤖 2.0.37`
+**Output:** `Claude: 2.0.37`
 
-### Custom Icon and Color
+### Custom Prefix and Color
 
 ```json
 {
   "plugins": [
     {
       "name": "claude-version",
-      "icon": "📟",
+      "prefix": "📟",
       "color": "magenta"
     }
   ]
@@ -63,14 +63,14 @@ Displays the current Claude Code version in the statusline.
 
 **Output:** `📟 2.0.37` (in magenta)
 
-### Minimal (no icon)
+### Minimal (no prefix)
 
 ```json
 {
   "plugins": [
     {
       "name": "claude-version",
-      "icon": ""
+      "prefix": ""
     }
   ]
 }
@@ -85,7 +85,7 @@ Displays the current Claude Code version in the statusline.
   "plugins": [
     {
       "name": "claude-version",
-      "icon": "v"
+      "prefix": "v"
     }
   ]
 }
@@ -109,15 +109,15 @@ Displays the current Claude Code version in the statusline.
 
 ```bash
 # Default
-🤖 2.0.37
+Claude: 2.0.37
 
-# Custom icon
+# Custom prefix
 📟 2.0.37
 
 # Different colors
-🤖 2.0.37  # (in cyan - default)
-🤖 2.0.37  # (in magenta)
-🤖 2.0.37  # (in green)
+Claude: 2.0.37  # (in cyan - default)
+Claude: 2.0.37  # (in magenta)
+Claude: 2.0.37  # (in green)
 ```
 
 ## Notes

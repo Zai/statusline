@@ -16,7 +16,7 @@ export default {
             const nodeVersion = process.version;
             const displayVersion = options?.format === 'short' ? nodeVersion.replace(/^v/, '') : nodeVersion;
             const colorCode = colors[config.color];
-            const content = `${colorCode}${config.icon} ${displayVersion}${colors.reset}`;
+            const content = `${colorCode}${config.prefix} ${displayVersion}${colors.reset}`;
             return { content };
         }
         catch (error) {

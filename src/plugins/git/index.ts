@@ -97,7 +97,7 @@ export default {
 
       // Branch
       const branchColorCode = colors[config.color as keyof typeof colors];
-      parts.push(`${config.icon}${branchColorCode}${gitBranch}${colors.reset}`);
+      parts.push(`${config.prefix}${branchColorCode}${gitBranch}${colors.reset}`);
 
       // Stats
       const statsParts: string[] = [];

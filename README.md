@@ -104,7 +104,7 @@ Override any plugin setting by adding fields:
   "plugins": [
     {
       "name": "directory",
-      "icon": "📂",
+      "prefix": "📂",
       "options": { "showFullPath": true }
     },
     {
@@ -121,7 +121,7 @@ Override any plugin setting by adding fields:
 
 **Per-plugin options:**
 - **`name`** *(required)*: Plugin name
-- **`icon`**: Custom icon
+- **`prefix`**: Custom prefix
 - **`color`**: Text color (`"blue"`, `"green"`, `"cyan"`, `"yellow"`, `"magenta"`, `"red"`, `"gray"`)
 - **`options`**: Plugin-specific options (see plugin docs)
 
@@ -141,7 +141,7 @@ Plugin's default (from `src/plugins/directory/default.json`):
 ```json
 {
   "name": "directory",
-  "icon": "📁",
+  "prefix": "📁",
   "color": "blue",
   "options": { "showFullPath": false }
 }
@@ -151,7 +151,7 @@ Your override (in root `config.json`):
 ```json
 {
   "name": "directory",
-  "icon": "📂",
+  "prefix": "📂",
   "options": { "showFullPath": true }
 }
 ```
@@ -160,7 +160,7 @@ Result after merge:
 ```json
 {
   "name": "directory",
-  "icon": "📂",           ← overridden
+  "prefix": "📂",           ← overridden
   "color": "blue",        ← kept from default
   "options": { "showFullPath": true }  ← overridden
 }
@@ -173,7 +173,7 @@ Result after merge:
 Displays the current directory name or full path.
 
 - **Default:** `📁 statusline`
-- **Options:** `showFullPath`, custom icon/color
+- **Options:** `showFullPath`, custom prefix/color
 - **[Full documentation →](src/plugins/directory/README.md)**
 
 #### 🔀 [Git](src/plugins/git/README.md)
@@ -205,7 +205,7 @@ Shows Claude Code token usage with count and percentage.
 Displays the current Claude Code version.
 
 - **Default:** `🤖 2.0.37`
-- **Options:** Custom icon/color
+- **Options:** Custom prefix/color
 - **[Full documentation →](src/plugins/claude-version/README.md)**
 
 ### Creating Custom Plugins
@@ -298,11 +298,11 @@ Result:
 ### Color Preview
 
 In your terminal, the statusline will appear with the following colors:
-- **Directory**: Bright blue with 📁 icon
+- **Directory**: Bright blue with 📁 prefix
 - **Git branch**: Green (configurable with `color`)
 - **Git modifications**: Yellow `!N +X/-Y` format (configurable with `dirtyColor`)
-- **Node version**: Green with ⬢ icon
-- **Claude tokens**: Cyan with 🔵 icon
+- **Node version**: Green with ⬢ prefix
+- **Claude tokens**: Cyan with 🔵 prefix
 
 All colors are customizable per-plugin in your `config.json`.
 
@@ -458,9 +458,9 @@ Creating your own plugin is straightforward with the dynamic loading system!
 
 See the [guide](src/plugins/README.md) for complete examples and best practices!
 
-### Available Icons
+### Available Prefixes
 
-Some icon ideas to use:
+Some prefix ideas to use:
 - 📁 Folder
 - 🔀 Git branch
 - ✨ Clean

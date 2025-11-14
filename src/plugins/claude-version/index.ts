@@ -33,7 +33,7 @@ export default {
       }
 
       const colorCode = colors[config.color as keyof typeof colors];
-      const content = `${colorCode}${config.icon} ${version}${colors.reset}`;
+      const content = `${colorCode}${config.prefix} ${version}${colors.reset}`;
 
       return { content };
     } catch (error) {

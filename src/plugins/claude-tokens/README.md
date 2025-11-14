@@ -16,7 +16,7 @@ Displays Claude Code token usage and percentage in the statusline.
 ```json
 {
   "name": "claude-tokens",
-  "icon": "🔵",
+  "prefix": "Tokens:",
   "color": "cyan",
   "options": {
     "showPercentage": true,
@@ -30,9 +30,9 @@ Displays Claude Code token usage and percentage in the statusline.
 
 ### Common Options
 
-- **`icon`** (string): Icon to display before token info
-  - Default: `"🔵"`
-  - Example: `"🔵"`, `"📊"`, `"💬"`, `""`
+- **`prefix`** (string): Prefix to display before token info
+  - Default: `"Tokens:"`
+  - Example: `"Tokens:"`, `"🔵"`, `"📊"`, `""`
 
 - **`color`** (string): Text color for token info
   - Default: `"cyan"`
@@ -58,17 +58,17 @@ Displays Claude Code token usage and percentage in the statusline.
 
 | Options | Output |
 |---------|--------|
-| Both count + percentage | `🔵 59.1k/200k (29.6%)` |
-| Count only | `🔵 59.1k` |
-| Percentage only | `🔵 29.6%` |
+| Both count + percentage | `Tokens: 59.1k/200k (29.6%)` |
+| Count only | `Tokens: 59.1k` |
+| Percentage only | `Tokens: 29.6%` |
 
 ### Full Format
 
 | Options | Output |
 |---------|--------|
-| Both count + percentage | `🔵 59,100/200,000 (29.6%)` |
-| Count only | `🔵 59,100/200,000` |
-| Percentage only | `🔵 (29.6%)` |
+| Both count + percentage | `Tokens: 59,100/200,000 (29.6%)` |
+| Count only | `Tokens: 59,100/200,000` |
+| Percentage only | `Tokens: (29.6%)` |
 
 ## Usage Examples
 
@@ -84,7 +84,7 @@ Displays Claude Code token usage and percentage in the statusline.
 }
 ```
 
-**Output:** `🔵 59.1k/200k (29.6%)`
+**Output:** `Tokens: 59.1k/200k (29.6%)`
 
 ### Full Format
 
@@ -101,7 +101,7 @@ Displays Claude Code token usage and percentage in the statusline.
 }
 ```
 
-**Output:** `🔵 59,100/200,000 (29.6%)`
+**Output:** `Tokens: 59,100/200,000 (29.6%)`
 
 ### Percentage Only
 
@@ -119,7 +119,7 @@ Displays Claude Code token usage and percentage in the statusline.
 }
 ```
 
-**Output:** `🔵 29.6%`
+**Output:** `Tokens: 29.6%`
 
 ### Count Only
 
@@ -137,16 +137,16 @@ Displays Claude Code token usage and percentage in the statusline.
 }
 ```
 
-**Output:** `🔵 59.1k/200k`
+**Output:** `Tokens: 59.1k/200k`
 
-### Custom Icon and Color
+### Custom Prefix and Color
 
 ```json
 {
   "plugins": [
     {
       "name": "claude-tokens",
-      "icon": "📊",
+      "prefix": "📊",
       "color": "magenta"
     }
   ]
@@ -216,16 +216,16 @@ totalTokens = input_tokens + output_tokens +
 
 ```bash
 # Compact format (default)
-🔵 59.1k/200k (29.6%)
+Tokens: 59.1k/200k (29.6%)
 
 # Full format
-🔵 59,100/200,000 (29.6%)
+Tokens: 59,100/200,000 (29.6%)
 
 # Percentage only
-🔵 29.6%
+Tokens: 29.6%
 
 # Count only
-🔵 59.1k/200k
+Tokens: 59.1k/200k
 
 # Custom style
 📊 59.1k/200k (29.6%)  # (in magenta)

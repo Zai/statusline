@@ -36,7 +36,7 @@ export interface PluginOptions {
 
 export interface PluginConfig {
   name: string;
-  icon?: string;
+  prefix?: string;
   color?: string;
   options?: PluginOptions;
 }

@@ -59,7 +59,7 @@ export default {
             }
             const colorCode = colors[config.color];
             const tokenContent = formatTokenContent(usedTokens, maxTokens, percentage, options.showCount, options.showPercentage, options.format);
-            const content = `${colorCode}${config.icon}${tokenContent}${colors.reset}`;
+            const content = `${colorCode}${config.prefix}${tokenContent}${colors.reset}`;
             return { content };
         }
         catch (error) {

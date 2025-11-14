@@ -15,7 +15,7 @@ Displays the current Git branch and modification statistics in the statusline.
 ```json
 {
   "name": "git",
-  "icon": "",
+  "prefix": "",
   "color": "green",
   "options": {
     "showFileCount": true,
@@ -29,7 +29,7 @@ Displays the current Git branch and modification statistics in the statusline.
 
 ### Common Options
 
-- **`icon`** (string): Icon to display before the branch name
+- **`icon`** (string): Prefix to display before the branch name
   - Default: `""` (Git branch icon)
   - Example: `""`, `"±"`, `""`
 
@@ -158,14 +158,14 @@ Where:
 
 **Output:** `main`
 
-### Custom Icon
+### Custom Prefix
 
 ```json
 {
   "plugins": [
     {
       "name": "git",
-      "icon": ""
+      "prefix": ""
     }
   ]
 }

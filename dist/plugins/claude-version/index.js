@@ -18,7 +18,7 @@ export default {
                 return { content: "" };
             }
             const colorCode = colors[config.color];
-            const content = `${colorCode}${config.icon} ${version}${colors.reset}`;
+            const content = `${colorCode}${config.prefix} ${version}${colors.reset}`;
             return { content };
         }
         catch (error) {

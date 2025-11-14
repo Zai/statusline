@@ -1,6 +1,6 @@
 {
   "name": "claude-tokens",
-  "icon": "🔵",
+  "prefix": "Tokens:",
   "color": "cyan",
   "options": {
     "showPercentage": true,
