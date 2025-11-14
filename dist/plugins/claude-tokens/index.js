@@ -3,6 +3,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { colors } from "../../lib/constant.js";
 import { parseTranscript } from "./transcript-parser.js";
+import { deepMerge } from "../../lib/merge.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Load default config
@@ -39,7 +40,7 @@ export default {
     execute(context, userConfig) {
         try {
             // Merge default config with user config
-            const config = { ...defaultConfig, ...userConfig };
+            const config = deepMerge(defaultConfig, userConfig);
             const options = config.options;
             let usedTokens = 0;
             let maxTokens = 0;

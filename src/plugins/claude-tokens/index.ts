@@ -9,6 +9,7 @@ import {
   PluginResult,
 } from "../../types/plugin.js";
 import { parseTranscript } from "./transcript-parser.js";
+import { deepMerge } from "../../lib/merge.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -66,7 +67,7 @@ export default {
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
       // Merge default config with user config
-      const config = { ...defaultConfig, ...userConfig };
+      const config = deepMerge(defaultConfig, userConfig);
       const options = config.options as ClaudeTokensOptions | undefined;
 
       let usedTokens = 0;

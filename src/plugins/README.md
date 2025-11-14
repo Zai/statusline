@@ -34,7 +34,7 @@ mkdir -p src/plugins/my-plugin
 ```json
 {
   "name": "my-plugin",
-  "icon": "🔧",
+  "prefix": "🔧",
   "color": "cyan",
   "options": {
     "myOption": true
@@ -54,6 +54,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
 import { colors } from '../../lib/constant.js';
+import { deepMerge } from '../../lib/merge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -73,11 +74,12 @@ export default {
 
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
-      // Merge default config with user config
-      const config = { ...defaultConfig, ...userConfig };
+      // IMPORTANT: Use deepMerge instead of spread operator!
+      // deepMerge properly merges nested objects like 'options'
+      const config = deepMerge(defaultConfig, userConfig);
 
       // Use values from merged config (no hardcoded defaults!)
-      const icon = config.icon;
+      const prefix = config.prefix;
       const color = config.color;
       const colorCode = colors[color as keyof typeof colors] || colors.cyan;
 
@@ -86,7 +88,7 @@ export default {
       const myOption = options?.myOption;
 
       // Your plugin logic here
-      const content = `${colorCode}${icon} My Content${colors.reset}`;
+      const content = `${colorCode}${prefix} My Content${colors.reset}`;
 
       return { content };
     } catch (error) {
@@ -154,7 +156,7 @@ User-provided configuration for the plugin:
 ```typescript
 interface PluginConfig {
   name: string;
-  icon?: string;
+  prefix?: string;
   color?: string;
   options?: PluginOptions;  // Plugin-specific options
 }
@@ -177,17 +179,37 @@ Plugins are **autonomous** and handle their own configuration merging:
 
 1. **Default config** is loaded from `default.json`
 2. **User config** is passed via `execute(context, userConfig)`
-3. **Merge** happens inside the plugin: `{ ...defaultConfig, ...userConfig }`
+3. **Deep merge** happens inside the plugin: `deepMerge(defaultConfig, userConfig)`
 
-Example:
+**⚠️ IMPORTANT: Always use `deepMerge` instead of spread operator!**
+
+The spread operator (`{ ...defaultConfig, ...userConfig }`) only does a **shallow merge**, which means nested objects like `options` will be completely replaced instead of merged.
+
+**❌ Wrong (shallow merge):**
+```typescript
+const config = { ...defaultConfig, ...userConfig };
+// If userConfig.options exists, it REPLACES defaultConfig.options entirely!
+```
+
+**✅ Correct (deep merge):**
+```typescript
+import { deepMerge } from '../../lib/merge.js';
+const config = deepMerge(defaultConfig, userConfig);
+// Nested objects are properly merged recursively
+```
+
+**Example:**
 
 ```typescript
 // Plugin's default.json
 {
   "name": "my-plugin",
-  "icon": "🔧",
+  "prefix": "🔧",
   "color": "cyan",
-  "options": { "myOption": true }
+  "options": {
+    "myOption": true,
+    "anotherOption": "default"
+  }
 }
 
 // User's config.json (root)
@@ -195,18 +217,34 @@ Example:
   "plugins": [
     {
       "name": "my-plugin",
-      "icon": "⚙️",
-      "options": { "myOption": false }
+      "prefix": "⚙️",
+      "options": {
+        "myOption": false
+      }
     }
   ]
 }
 
-// Merged result inside plugin
+// With deepMerge (✅ correct result)
 {
   "name": "my-plugin",
-  "icon": "⚙️",        // overridden
-  "color": "cyan",      // kept from default
-  "options": { "myOption": false }  // overridden
+  "prefix": "⚙️",                    // overridden
+  "color": "cyan",                    // kept from default
+  "options": {
+    "myOption": false,                // overridden
+    "anotherOption": "default"        // kept from default!
+  }
+}
+
+// With spread operator (❌ wrong result)
+{
+  "name": "my-plugin",
+  "prefix": "⚙️",                    // overridden
+  "color": "cyan",                    // kept from default
+  "options": {
+    "myOption": false                 // only this!
+    // anotherOption is LOST! ❌
+  }
 }
 ```
 
@@ -236,31 +274,48 @@ if (!data) {
 }
 ```
 
-### 3. No Hardcoded Defaults!
+### 3. Always Use deepMerge!
+
+**⚠️ CRITICAL:** Always use `deepMerge` to merge configurations, never the spread operator!
+
+**❌ Bad (shallow merge):**
+```typescript
+const config = { ...defaultConfig, ...userConfig };  // NO! Breaks nested options
+```
+
+**✅ Good (deep merge):**
+```typescript
+import { deepMerge } from '../../lib/merge.js';
+const config = deepMerge(defaultConfig, userConfig);  // YES! Properly merges nested objects
+```
+
+**Why?** The spread operator only does a shallow merge. If `userConfig.options` exists, it will completely replace `defaultConfig.options`, losing all default option values that weren't overridden.
+
+### 4. No Hardcoded Defaults!
 
 **IMPORTANT:** All default values must be in `default.json`, not in code!
 
 **❌ Bad (hardcoded defaults):**
 ```typescript
-const icon = config.icon || '🔧';           // NO!
-const color = config.color || 'cyan';       // NO!
-const myOption = options?.myOption ?? true; // NO!
+const prefix = config.prefix || '🔧';         // NO!
+const color = config.color || 'cyan';         // NO!
+const myOption = options?.myOption ?? true;   // NO!
 ```
 
 **✅ Good (defaults from default.json):**
 ```typescript
-// Merge happens at the top of execute()
-const config = { ...defaultConfig, ...userConfig };
+// Deep merge happens at the top of execute()
+const config = deepMerge(defaultConfig, userConfig);
 
 // Then just use the values directly
-const icon = config.icon;
+const prefix = config.prefix;
 const color = config.color;
 const myOption = options?.myOption;
 ```
 
 After the merge, all values are guaranteed to exist from `defaultConfig` (loaded from `default.json`). Only use fallbacks for type safety (e.g., `colors[color as keyof typeof colors] || colors.cyan`).
 
-### 4. Use ANSI Color Codes
+### 5. Use ANSI Color Codes
 
 Use the `colors` constant for consistent styling:
 
@@ -272,13 +327,13 @@ const content = `${colors.cyan}${icon} Text${colors.reset}`;
 
 Available colors: `reset`, `bright`, `dim`, `cyan`, `blue`, `green`, `yellow`, `magenta`, `gray`, `red`
 
-### 5. Keep Performance in Mind
+### 6. Keep Performance in Mind
 
 - Avoid expensive operations in `execute()`
 - Cache results when possible
 - Use `stdio: ['pipe', 'pipe', 'ignore']` when calling child processes
 
-### 6. Document Your Plugin
+### 7. Document Your Plugin
 
 Create a `README.md` in your plugin directory documenting:
 - What the plugin does
@@ -297,7 +352,7 @@ Create a `README.md` in your plugin directory documenting:
 3. **Execution**: For each registered plugin (in order):
    - Plugin receives `context` and `userConfig`
    - Plugin loads its `default.json` (default config)
-   - Plugin merges configs: `{ ...defaultConfig, ...userConfig }`
+   - Plugin merges configs: `deepMerge(defaultConfig, userConfig)`
    - Plugin executes its logic
    - Plugin returns `PluginResult`
 4. **Assembly**: Results are joined with separator

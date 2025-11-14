@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { colors } from '../../lib/constant.js';
+import { deepMerge } from '../../lib/merge.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Load default config
@@ -65,7 +66,7 @@ export default {
     execute(context, userConfig) {
         try {
             // Merge default config with user config
-            const config = { ...defaultConfig, ...userConfig };
+            const config = deepMerge(defaultConfig, userConfig);
             const gitBranch = getGitBranch(context.currentDir);
             // If no git branch, display nothing
             if (!gitBranch) {

@@ -3,6 +3,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Plugin, PluginContext, PluginConfig, PluginResult } from '../../types/plugin.js';
 import { colors } from '../../lib/constant.js';
+import { deepMerge } from '../../lib/merge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,7 +23,7 @@ export default {
   execute(context: PluginContext, userConfig: PluginConfig): PluginResult {
     try {
       // Merge default config with user config
-      const config = { ...defaultConfig, ...userConfig };
+      const config = deepMerge(defaultConfig, userConfig);
       const options = config.options as NodeVersionOptions | undefined;
 
       const nodeVersion = process.version;
