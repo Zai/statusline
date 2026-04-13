@@ -8,6 +8,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Load default config
 const defaultConfig = JSON.parse(readFileSync(join(__dirname, "default.json"), "utf-8"));
+function formatCompactTokens(tokens) {
+    if (tokens >= 1_000_000) {
+        return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}m`;
+    }
+    return `${(tokens / 1000).toFixed(1)}k`;
+}
 function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPercentage, format) {
     let result = "";
     if (format === "full") {
@@ -24,10 +30,10 @@ function formatTokenContent(usedTokens, maxTokens, percentage, showCount, showPe
     else {
         // compact format
         if (showCount && showPercentage && maxTokens > 0) {
-            result += ` ${(usedTokens / 1000).toFixed(1)}k/${(maxTokens / 1000).toFixed(0)}k (${percentage}%)`;
+            result += ` ${formatCompactTokens(usedTokens)}/${formatCompactTokens(maxTokens)} (${percentage}%)`;
         }
         else if (showCount) {
-            result += ` ${(usedTokens / 1000).toFixed(1)}k`;
+            result += ` ${formatCompactTokens(usedTokens)}`;
         }
         else if (showPercentage && maxTokens > 0) {
             result += ` ${percentage}%`;
@@ -47,7 +53,7 @@ export default {
             let percentage = "0";
             // Try to read transcript if available
             if (context.input.transcript_path) {
-                const tokenUsage = parseTranscript(context.input.transcript_path);
+                const tokenUsage = parseTranscript(context.input.transcript_path, context.input.model?.id);
                 if (tokenUsage) {
                     usedTokens = tokenUsage.totalTokens;
                     maxTokens = tokenUsage.maxTokens;

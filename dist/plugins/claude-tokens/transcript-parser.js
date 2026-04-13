@@ -1,5 +1,18 @@
 import { readFileSync } from 'fs';
-export function parseTranscript(transcriptPath) {
+/**
+ * Determine the context window size based on model ID.
+ * Model IDs ending with [1m] indicate the 1M context variant.
+ * Falls back to 200k if the model is unknown.
+ */
+function getMaxTokensForModel(modelId) {
+    if (!modelId)
+        return 200_000;
+    if (modelId.includes('[1m]')) {
+        return 1_000_000;
+    }
+    return 200_000;
+}
+export function parseTranscript(transcriptPath, modelId) {
     try {
         const content = readFileSync(transcriptPath, 'utf-8');
         const lines = content.trim().split('\n');
@@ -30,18 +43,12 @@ export function parseTranscript(transcriptPath) {
         const totalCacheCreationTokens = lastUsage.cache_creation_input_tokens || 0;
         const totalCacheReadTokens = lastUsage.cache_read_input_tokens || 0;
         const totalOutputTokens = lastUsage.output_tokens || 0;
-        // Le contexte total réel = input + output du dernier message + cache
-        // (input_tokens inclut déjà système + messages précédents)
+        // Le contexte total = input + cache (sans output, qui sera inclus dans l'input du prochain appel)
         const contextTokens = totalInputTokens +
-            totalOutputTokens +
             totalCacheCreationTokens +
             totalCacheReadTokens;
-        // Ajouter l'autocompact buffer (constant à ~22.5% de la fenêtre, soit 45k pour 200k)
-        // L'autocompact buffer est un espace réservé par Claude Code, non inclus dans l'usage API
-        const autocompactBuffer = 45000;
-        const totalTokens = contextTokens + autocompactBuffer;
-        // Claude Sonnet 4.5 a une fenêtre de contexte de 200k tokens
-        const maxTokens = 200000;
+        const maxTokens = getMaxTokensForModel(modelId);
+        const totalTokens = contextTokens;
         const percentage = (totalTokens / maxTokens) * 100;
         return {
             totalInputTokens,
